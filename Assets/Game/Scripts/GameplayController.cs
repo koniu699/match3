@@ -29,28 +29,80 @@ namespace Game.Scripts
 
             if (selectedGridElement.IsNeighbour(clickedElement))
             {
-                var selectedValue = selectedGridElement.Match3Element;
-                var clickedValue = clickedElement.Match3Element;
-                selectedGridElement.SetValue(clickedValue);
-                clickedElement.SetValue(selectedValue);
+                SwapGridElements(selectedGridElement, clickedElement);
                 var selectedElemMatches = TryFindMatches(selectedGridElement);
                 var clickedElemMatches = TryFindMatches(clickedElement);
-                
+
                 ClearGridElements(selectedElemMatches);
                 ClearGridElements(clickedElemMatches);
+
+                DropElements();
+                FillRandomElements();
                 gridObject.Grid.GridUpdated?.Invoke();
+                
                 selectedGridElement = null;
             }
             else
                 selectedGridElement = clickedElement;
         }
 
+        void FillRandomElements()
+        {
+            for (var i = 0; i < gridObject.Grid.GridReference.GetLength(0); i++)
+            {
+                for (var j = 0; j < gridObject.Grid.GridReference.GetLength(1); j++)
+                {
+                    if (gridObject.Grid.GetGridObject(i, j) == null)
+                        gridObject.Grid.SetGridObject(i, j, gridObject.CreateNewElement(gridObject.Grid, i, j));
+                }
+            }
+        }
+
+        void SwapGridElements(GridElement firstElement, GridElement secondElement)
+        {
+            var selectedValue = firstElement.Match3Element;
+            var clickedValue = secondElement.Match3Element;
+            firstElement.SetValue(clickedValue);
+            secondElement.SetValue(selectedValue);
+        }
+
+        void DropElements()
+        {
+            for (var i = 0; i < gridObject.Grid.GridReference.GetLength(0); i++)
+            {
+                for (var j = 0; j < gridObject.Grid.GridReference.GetLength(1); j++)
+                {
+                    if (gridObject.Grid.GetGridObject(i, j) == null)
+                    {
+                        TryDropElementAbove(i, j);
+                    }
+                }
+            }
+        }
+
+        void TryDropElementAbove(int i, int j)
+        {
+            for (var k = 1; k < gridObject.Grid.GridReference.GetLength(1); k++)
+            {
+                if (!gridObject.Grid.PositionInBounds(i, j + k))
+                    break;
+                if (gridObject.Grid.GetGridObject(i, j + k) != null)
+                {
+                    gridObject.Grid.SetGridObject(i, j,
+                        new GridElement(gridObject.Grid, i, j,
+                            gridObject.Grid.GetGridObject(i, j + k).Match3Element));
+                    gridObject.Grid.SetGridObject(i, j + k, null);
+                    break;
+                }
+            }
+        }
+
         HashSet<GridElement> TryFindMatches(GridElement gridElement)
         {
             var horizontalMatches = FindMatchesFor(1, 0, gridElement);
-            horizontalMatches.AddRange(FindMatchesFor(-1, 0 , gridElement));
+            horizontalMatches.AddRange(FindMatchesFor(-1, 0, gridElement));
             var verticalMatches = FindMatchesFor(0, 1, gridElement);
-            verticalMatches.AddRange(FindMatchesFor(0,-1, gridElement));
+            verticalMatches.AddRange(FindMatchesFor(0, -1, gridElement));
 
             horizontalMatches.Add(gridElement);
             verticalMatches.Add(gridElement);
@@ -67,9 +119,14 @@ namespace Game.Scripts
         {
             foreach (var element in elements)
             {
-                gridObject.Grid.GetGridObject(element.X, element.Y).ElementDestroyed();
-                gridObject.Grid.SetGridObject(element.X, element.Y, null);
+                DestroyGridElement(element);
             }
+        }
+
+        void DestroyGridElement(GridElement element)
+        {
+            gridObject.Grid.GetGridObject(element.X, element.Y)?.ElementDestroyed();
+            gridObject.Grid.SetGridObject(element.X, element.Y, null);
         }
 
         HashSet<GridElement> FindMatchesFor(int valueModX, int valueModY, GridElement gridElement)

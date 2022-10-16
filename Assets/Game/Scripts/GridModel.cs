@@ -35,7 +35,7 @@ namespace Game.Scripts
         }
 
 
-        GridElement CreateNewElement(Grid<GridElement> targetGrid, int posX, int posY)
+        public GridElement CreateNewElement(Grid<GridElement> targetGrid, int posX, int posY)
         {
             var instance = new GridElement(targetGrid, posX, posY, match3Elements.RandomElement());
             return instance;
