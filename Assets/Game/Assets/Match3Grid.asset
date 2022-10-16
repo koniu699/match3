@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a6daf8b82e444aa943c229ae73d7cee, type: 3}
+  m_Name: Match3Grid
+  m_EditorClassIdentifier: 
+  match3Elements:
+  - {fileID: 11400000, guid: f75ff00da9d4e164087807898dd3cd38, type: 2}
+  - {fileID: 11400000, guid: 4d36865142c99b64eb852889fa79046d, type: 2}
+  - {fileID: 11400000, guid: 9f591d417322e8d44ab0af4e709f0b83, type: 2}
+  - {fileID: 11400000, guid: 5ab4927a82859244389b9f6fcf0b319c, type: 2}
+  gridValueUpdatedEvent: {fileID: 11400000, guid: 48626b5734c7c384e8ce888cd76d089a, type: 2}
