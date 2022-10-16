@@ -49,12 +49,20 @@ namespace Game.Scripts
             this.y = y;
             gridModel = targetModel;
             assignedElement = gridModel.Grid.GetGridObject(x, y);
+            assignedElement.ElementDestroyed += OnElementDestroyed;
             ResetView();
+        }
+
+        void OnElementDestroyed()
+        {
+            assignedElement.ElementDestroyed -= OnElementDestroyed;
+            Destroy(this);
         }
 
         void ResetView()
         {
-            spriteRenderer.sprite = assignedElement.AssignedElement.Sprite;
+            if (assignedElement != null)
+                spriteRenderer.sprite = assignedElement.Match3Element.Sprite;
             borderObject.SetActive(false);
         }
 

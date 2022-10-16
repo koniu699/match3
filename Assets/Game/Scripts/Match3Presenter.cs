@@ -11,7 +11,7 @@ namespace Game.Scripts
 
         public void Awake()
         {
-            gridModel.GridCreated += OnGridUpdated;
+            gridModel.GridUpdated += OnGridUpdated;
         }
 
         void OnGridUpdated()
@@ -22,13 +22,16 @@ namespace Game.Scripts
             {
                 for (var j = 0; j < gridModel.Grid.GridReference.GetLength(1); j++)
                 {
-                    var position = new Vector2(i * gridElementSize, j * gridElementSize);
-                    var instance = Instantiate(prefab, boardOrigin);
-                    instance.transform.localPosition = position;
-                    var match3Controller = instance.GetComponent<Match3ElementController>();
-                    if (match3Controller == null)
-                        continue;
-                    match3Controller.Setup(i, j, gridModel);
+                    if (gridModel.Grid.GetGridObject(i, j) != null)
+                    {
+                        var position = new Vector2(i * gridElementSize, j * gridElementSize);
+                        var instance = Instantiate(prefab, boardOrigin);
+                        instance.transform.localPosition = position;
+                        var match3Controller = instance.GetComponent<Match3ElementController>();
+                        if (match3Controller == null)
+                            continue;
+                        match3Controller.Setup(i, j, gridModel);
+                    }
                 }
             }
         }

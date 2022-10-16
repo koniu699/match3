@@ -12,7 +12,7 @@ namespace Game.Scripts
         [SerializeField] List<Match3Element> match3Elements;
         [SerializeField] GridValueUpdatedEvent gridValueUpdatedEvent;
 
-        public UnityAction GridCreated;
+        public UnityAction GridUpdated;
 
         public Grid<GridElement> Grid { get; private set; }
 
@@ -20,7 +20,13 @@ namespace Game.Scripts
         {
             Grid = new Grid<GridElement>(width, height, (CreateNewElement));
             Grid.GridObjectValueUpdated += OnGridValueUpdated;
-            GridCreated?.Invoke();
+            Grid.GridUpdated += OnGridUpdated;
+            GridUpdated?.Invoke();
+        }
+
+        void OnGridUpdated()
+        {
+            GridUpdated?.Invoke();
         }
 
         void OnGridValueUpdated(int x, int y, GridElement element)

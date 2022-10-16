@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Game.Scripts.ScriptableEvents.Events;
+using Sirenix.Utilities;
 using UnityEngine;
 
 namespace Game.Scripts
@@ -28,33 +29,52 @@ namespace Game.Scripts
 
             if (selectedGridElement.IsNeighbour(clickedElement))
             {
-                var selectedValue = selectedGridElement.AssignedElement;
-                var clickedValue = clickedElement.AssignedElement;
+                var selectedValue = selectedGridElement.Match3Element;
+                var clickedValue = clickedElement.Match3Element;
                 selectedGridElement.SetValue(clickedValue);
                 clickedElement.SetValue(selectedValue);
-                TryFindMatches(selectedGridElement);
-                TryFindMatches(clickedElement);
-
+                var selectedElemMatches = TryFindMatches(selectedGridElement);
+                var clickedElemMatches = TryFindMatches(clickedElement);
+                
+                ClearGridElements(selectedElemMatches);
+                ClearGridElements(clickedElemMatches);
+                gridObject.Grid.GridUpdated?.Invoke();
                 selectedGridElement = null;
             }
             else
                 selectedGridElement = clickedElement;
         }
 
-        void TryFindMatches(GridElement gridElement)
+        HashSet<GridElement> TryFindMatches(GridElement gridElement)
         {
             var horizontalMatches = FindMatchesFor(1, 0, gridElement);
-            horizontalMatches += FindMatchesFor(-1, 0, gridElement);
+            horizontalMatches.AddRange(FindMatchesFor(-1, 0 , gridElement));
             var verticalMatches = FindMatchesFor(0, 1, gridElement);
-            verticalMatches += FindMatchesFor(0, -1, gridElement);
+            verticalMatches.AddRange(FindMatchesFor(0,-1, gridElement));
 
-
-            Debug.Log($"Matches found {horizontalMatches} - {verticalMatches}");
+            horizontalMatches.Add(gridElement);
+            verticalMatches.Add(gridElement);
+            var totalMatches = new HashSet<GridElement>();
+            if (horizontalMatches.Count >= 3)
+                totalMatches.AddRange(horizontalMatches);
+            if (verticalMatches.Count >= 3)
+                totalMatches.AddRange(verticalMatches);
+            Debug.Log($"Matches found {horizontalMatches.Count} - {verticalMatches.Count}");
+            return totalMatches;
         }
 
-        int FindMatchesFor(int valueModX, int valueModY, GridElement gridElement)
+        void ClearGridElements(HashSet<GridElement> elements)
         {
-            var matches = 0;
+            foreach (var element in elements)
+            {
+                gridObject.Grid.GetGridObject(element.X, element.Y).ElementDestroyed();
+                gridObject.Grid.SetGridObject(element.X, element.Y, null);
+            }
+        }
+
+        HashSet<GridElement> FindMatchesFor(int valueModX, int valueModY, GridElement gridElement)
+        {
+            var matches = new HashSet<GridElement>();
             var canTest = true;
             var i = 1;
             while (canTest)
@@ -63,9 +83,9 @@ namespace Game.Scripts
                 {
                     var elementToCheck =
                         gridObject.Grid.GetGridObject(gridElement.X + valueModX * i, gridElement.Y + valueModY * i);
-                    if (elementToCheck.AssignedElement == gridElement.AssignedElement)
+                    if (elementToCheck.Match3Element == gridElement.Match3Element)
                     {
-                        matches++;
+                        matches.Add(elementToCheck);
                         i++;
                     }
                     else

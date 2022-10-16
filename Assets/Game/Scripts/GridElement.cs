@@ -1,12 +1,15 @@
 ﻿using System;
+using UnityEngine.Events;
 
 namespace Game.Scripts
 {
     public class GridElement
     {
-        Grid<GridElement> grid;
+        public UnityAction ElementDestroyed;
 
-        public Match3Element AssignedElement { get; private set; }
+        readonly Grid<GridElement> grid;
+
+        public Match3Element Match3Element { get; private set; }
         public int X { get; }
 
         public int Y { get; }
@@ -15,7 +18,7 @@ namespace Game.Scripts
         {
             X = posX;
             Y = posY;
-            AssignedElement = element;
+            Match3Element = element;
             grid = targetGrid;
         }
 
@@ -28,8 +31,13 @@ namespace Game.Scripts
 
         public void SetValue(Match3Element newValue)
         {
-            AssignedElement = newValue;
+            Match3Element = newValue;
             grid.TriggerGridObjectValueUpdated(X, Y);
+        }
+
+        public void OnDestroy()
+        {
+            ElementDestroyed?.Invoke();
         }
     }
 }
