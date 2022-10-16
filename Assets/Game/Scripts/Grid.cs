@@ -49,7 +49,7 @@ namespace Game.Scripts
             return !PositionInBounds(x, y) ? default(T) : GridReference[x, y];
         }
 
-        bool PositionInBounds(int x, int y)
+        public bool PositionInBounds(int x, int y)
         {
             return (x >= 0 && x < GridReference.GetLength(0) && y >= 0 && y < GridReference.GetLength(1));
         }
