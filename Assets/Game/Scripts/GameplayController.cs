@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using Game.Scripts.ScriptableEvents.Events;
 using Sirenix.Utilities;
 using UnityEngine;
@@ -45,25 +46,33 @@ namespace Game.Scripts
                 await ClearGridElements(clickedElemMatches);
 
                 DropElements();
-                FillRandomElements();
+                var spawnedElements =  FillRandomElements();
                 gridObject.Grid.GridUpdated?.Invoke();
-
+                
+                await match3Presenter.ShowSpawnElements(spawnedElements);
                 selectedGridElement = null;
             }
             else
                 selectedGridElement = clickedElement;
         }
 
-        void FillRandomElements()
+        List<Vector2Int> FillRandomElements()
         {
-            for (var i = 0; i < gridObject.Grid.GridReference.GetLength(0); i++)
+            var gridX = gridObject.Grid.GridReference.GetLength(0);
+            var gridY = gridObject.Grid.GridReference.GetLength(1);
+            var elementsToSpawn = new List<Vector2Int>(gridX * gridY);
+            for (var i = 0; i < gridX; i++)
             {
-                for (var j = 0; j < gridObject.Grid.GridReference.GetLength(1); j++)
+                for (var j = 0; j < gridY; j++)
                 {
-                    if (gridObject.Grid.GetGridObject(i, j) == null)
-                        gridObject.Grid.SetGridObject(i, j, gridObject.CreateNewElement(gridObject.Grid, i, j));
+                    if (gridObject.Grid.GetGridObject(i, j) != null) 
+                        continue;
+                    gridObject.Grid.SetGridObject(i, j, gridObject.CreateNewElement(gridObject.Grid, i, j));
+                    elementsToSpawn.Add(new Vector2Int(i, j));
                 }
             }
+
+            return elementsToSpawn;
         }
 
         async Task SwapGridElements(GridElement firstElement, GridElement secondElement)
@@ -97,6 +106,8 @@ namespace Game.Scripts
                     break;
                 if (gridObject.Grid.GetGridObject(i, j + k) != null)
                 {
+                    Debug.Log($"DROPPING ELEMENT {i}/{j + k} to POSITION {i}/{j}");
+                    match3Presenter.DropElement(i, j + k, j);
                     gridObject.Grid.SetGridObject(i, j,
                         new GridElement(gridObject.Grid, i, j,
                             gridObject.Grid.GetGridObject(i, j + k).Match3Element));
@@ -127,7 +138,7 @@ namespace Game.Scripts
         async Task ClearGridElements(HashSet<GridElement> elements)
         {
             await match3Presenter.ShowElementsClear(elements.ToList());
-            
+
             foreach (var element in elements)
             {
                 DestroyGridElement(element);
