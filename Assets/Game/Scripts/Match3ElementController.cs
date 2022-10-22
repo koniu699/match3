@@ -87,5 +87,11 @@ namespace Game.Scripts
             await transform.DOMove(position, tweenSettings.TweenDuration).SetEase(tweenSettings.EaseType)
                 .OnComplete(() => { transform.position = prevPosition; });
         }
+
+        public async Task TweenHide()
+        {
+            var prevColor = spriteRenderer.color;
+            await spriteRenderer.DOFade(0f, tweenSettings.TweenDuration);
+        }
     }
 }

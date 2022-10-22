@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Game.Scripts.ScriptableEvents.Events;
 using Sirenix.Utilities;
@@ -40,8 +41,8 @@ namespace Game.Scripts
                 var selectedElemMatches = TryFindMatches(selectedGridElement);
                 var clickedElemMatches = TryFindMatches(clickedElement);
 
-                ClearGridElements(selectedElemMatches);
-                ClearGridElements(clickedElemMatches);
+                await ClearGridElements(selectedElemMatches);
+                await ClearGridElements(clickedElemMatches);
 
                 DropElements();
                 FillRandomElements();
@@ -123,8 +124,10 @@ namespace Game.Scripts
             return totalMatches;
         }
 
-        void ClearGridElements(HashSet<GridElement> elements)
+        async Task ClearGridElements(HashSet<GridElement> elements)
         {
+            await match3Presenter.ShowElementsClear(elements.ToList());
+            
             foreach (var element in elements)
             {
                 DestroyGridElement(element);

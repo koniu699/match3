@@ -54,5 +54,18 @@ namespace Game.Scripts
             tasks[1] =  secondController.TweenTo(firstController.transform.position);
             await Task.WhenAll(tasks);
         }
+
+        public async Task ShowElementsClear(List<GridElement> elements)
+        {
+            var tasks = new Task[elements.Count];
+            for (int i = 0; i < elements.Count; i++)
+            {
+                var gridElement = elements[i];
+                var elemController = match3ElementControllers[gridElement.X, gridElement.Y];
+                tasks[i] = elemController.TweenHide();
+            }
+
+            await Task.WhenAll(tasks);
+        }
     }
 }
