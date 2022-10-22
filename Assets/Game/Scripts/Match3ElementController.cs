@@ -1,4 +1,7 @@
-﻿using Game.Scripts.ScriptableEvents;
+﻿using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
+using DG.Tweening;
+using Game.Scripts.ScriptableEvents;
 using Game.Scripts.ScriptableEvents.Events;
 using UnityEngine;
 
@@ -6,6 +9,7 @@ namespace Game.Scripts
 {
     public class Match3ElementController : MonoBehaviour
     {
+        [SerializeField] TweenSettings tweenSettings;
         [SerializeField] SpriteRenderer spriteRenderer;
         [SerializeField] GridValueUpdatedEvent gridValueUpdatedEvent;
         [SerializeField] GridElementClickedEvent gridElementClickedEvent;
@@ -75,6 +79,13 @@ namespace Game.Scripts
         {
             gridElementClickedEvent.RemoveListener(OnGridElementClicked);
             gridValueUpdatedEvent.RemoveListener(OnGridValueUpdated);
+        }
+
+        public async Task TweenTo(Vector3 position)
+        {
+            var prevPosition = transform.position;
+            await transform.DOMove(position, tweenSettings.TweenDuration).SetEase(tweenSettings.EaseType)
+                .OnComplete(() => { transform.position = prevPosition; });
         }
     }
 }

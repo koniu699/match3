@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Game.Scripts.ScriptableEvents.Events;
 using Sirenix.Utilities;
 using UnityEngine;
@@ -11,6 +12,7 @@ namespace Game.Scripts
         [SerializeField] GridElementClickedEvent gridElementClicked;
         [SerializeField] Vector2Int gridDimensions;
         [SerializeField] GridValueUpdatedEvent gridValueUpdatedEvent;
+        [SerializeField] Match3Presenter match3Presenter;
 
         GridElement selectedGridElement;
 
@@ -21,6 +23,11 @@ namespace Game.Scripts
 
         void OnGridElementClicked(GridElement clickedElement)
         {
+            HandleElementClicked(clickedElement);
+        }
+
+        async void HandleElementClicked(GridElement clickedElement)
+        {
             if (selectedGridElement == null || selectedGridElement == clickedElement)
             {
                 selectedGridElement = clickedElement;
@@ -29,7 +36,7 @@ namespace Game.Scripts
 
             if (selectedGridElement.IsNeighbour(clickedElement))
             {
-                SwapGridElements(selectedGridElement, clickedElement);
+                await SwapGridElements(selectedGridElement, clickedElement);
                 var selectedElemMatches = TryFindMatches(selectedGridElement);
                 var clickedElemMatches = TryFindMatches(clickedElement);
 
@@ -39,7 +46,7 @@ namespace Game.Scripts
                 DropElements();
                 FillRandomElements();
                 gridObject.Grid.GridUpdated?.Invoke();
-                
+
                 selectedGridElement = null;
             }
             else
@@ -58,8 +65,9 @@ namespace Game.Scripts
             }
         }
 
-        void SwapGridElements(GridElement firstElement, GridElement secondElement)
+        async Task SwapGridElements(GridElement firstElement, GridElement secondElement)
         {
+            await match3Presenter.SwapElements(firstElement, secondElement);
             var selectedValue = firstElement.Match3Element;
             var clickedValue = secondElement.Match3Element;
             firstElement.SetValue(clickedValue);

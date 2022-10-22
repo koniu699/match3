@@ -125,6 +125,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50e5ea494fad4096857c94f9603b2ad7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  tweenSettings: {fileID: 11400000, guid: e6c596b4c4603db499b2f56a5e1aeaf8, type: 2}
   spriteRenderer: {fileID: 4947396696651320883}
   gridValueUpdatedEvent: {fileID: 11400000, guid: 48626b5734c7c384e8ce888cd76d089a, type: 2}
   gridElementClickedEvent: {fileID: 11400000, guid: 2a453000da994ab40888ef1e606a5916, type: 2}
