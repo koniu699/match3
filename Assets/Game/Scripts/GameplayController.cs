@@ -18,6 +18,8 @@ namespace Game.Scripts
 
         GridElement selectedGridElement;
 
+        bool inputBlocked;
+        
         void Awake()
         {
             gridElementClicked.AddListener(OnGridElementClicked);
@@ -42,12 +44,15 @@ namespace Game.Scripts
 
         async void HandleElementClicked(GridElement clickedElement)
         {
+            if (inputBlocked)
+                return;
             if (selectedGridElement == null || selectedGridElement == clickedElement)
             {
                 selectedGridElement = clickedElement;
                 return;
             }
 
+            inputBlocked = true;
             if (selectedGridElement.IsNeighbour(clickedElement))
             {
                 await SwapGridElements(selectedGridElement, clickedElement);
@@ -58,11 +63,35 @@ namespace Game.Scripts
                 await ClearGridElements(selectedElemMatches);
 
                 DropElements();
-                var spawnedElements =  FillRandomElements();
+                var spawnedElements = FillRandomElements();
                 gridObject.Grid.GridUpdated?.Invoke();
                 // await match3Presenter.ShowSpawnElements(spawnedElements);
                 match3Presenter.HardRedraw();
                 selectedGridElement = null;
+
+                while (true)
+                {
+                    var matches = new HashSet<GridElement>();
+                    for (int i = 0; i < gridObject.Grid.GridReference.GetLength(0); i++)
+                    {
+                        for (int j = 0; j < gridObject.Grid.GridReference.GetLength(1); j++)
+                        {
+                            matches.AddRange(TryFindMatches(gridObject.Grid.GetGridObject(i, j)));
+                        }
+                    }
+
+                    if (matches.Count <= 0)
+                    {
+                        inputBlocked = false;
+                        break;
+                    }
+
+                    await ClearGridElements(matches);
+                    DropElements();
+                    FillRandomElements();
+                    gridObject.Grid.GridUpdated?.Invoke();
+                    match3Presenter.HardRedraw();
+                }
             }
             else
                 selectedGridElement = clickedElement;
@@ -77,7 +106,7 @@ namespace Game.Scripts
             {
                 for (var j = 0; j < gridY; j++)
                 {
-                    if (gridObject.Grid.GetGridObject(i, j) != null) 
+                    if (gridObject.Grid.GetGridObject(i, j) != null)
                         continue;
                     Debug.Log($"FILL RANDOM ELEM FOR {i}/{j}");
                     gridObject.Grid.SetGridObject(i, j, gridObject.CreateNewElement(gridObject.Grid, i, j));
