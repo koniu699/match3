@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5d538c28548645e4b360df9efa60cdb4, type: 3}
-  m_Name: Blue
+  m_Name: Bomb
   m_EditorClassIdentifier: 
-  sprite: {fileID: 21300000, guid: 0a77101ce029fc944a9707d48a77f5de, type: 3}
-  weight: 10
+  sprite: {fileID: 21300000, guid: cdd08d1cc41c11749ad8ae9eaa092978, type: 3}
+  weight: 5

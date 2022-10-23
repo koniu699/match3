@@ -13,3 +13,4 @@ MonoBehaviour:
   m_Name: Green
   m_EditorClassIdentifier: 
   sprite: {fileID: 21300000, guid: cf984c90d1b45914cafcfea616a302db, type: 3}
+  weight: 10
