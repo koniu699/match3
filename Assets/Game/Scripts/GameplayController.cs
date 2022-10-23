@@ -67,9 +67,8 @@ namespace Game.Scripts
                 await AnimateClearGridElements(selectedElemMatches);
 
                 DropElements();
-                var spawnedElements = FillRandomElements();
+                FillRandomElements();
                 gridObject.Grid.GridUpdated?.Invoke();
-                // await match3Presenter.ShowSpawnElements(spawnedElements);
                 match3Presenter.HardRedraw();
                 selectedGridElement = null;
 
@@ -88,7 +87,7 @@ namespace Game.Scripts
                 {
                     for (var j = 0; j < gridObject.Grid.GridReference.GetLength(1); j++)
                     {
-                        matches.AddRange(TryFindMatches(gridObject.Grid.GetGridObject(i, j)));
+                        matches.AddRange(TryFindMatches(gridObject.Grid.GetGridObject(i, j), useSpecials));
                     }
                 }
 
@@ -96,10 +95,6 @@ namespace Game.Scripts
                 {
                     inputBlocked = false;
                     break;
-                }
-
-                if (useSpecials)
-                {
                 }
 
                 if (useAnimations)
@@ -163,7 +158,6 @@ namespace Game.Scripts
                     break;
                 if (gridObject.Grid.GetGridObject(i, j + k) != null)
                 {
-                    // match3Presenter.DropElement(i, j + k, j);
                     gridObject.Grid.SetGridObject(i, j,
                         new GridElement(gridObject.Grid, i, j,
                             gridObject.Grid.GetGridObject(i, j + k).Match3Element));
