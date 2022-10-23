@@ -21,7 +21,9 @@ namespace Game.Scripts
 
         void OnGridUpdated()
         {
-            Debug.Log("Draw grid triggered");
+            // Debug.Log("Draw grid triggered");
+            transform.position = new Vector3(gridElementSize * (-gridModel.Grid.GridReference.GetLength(0) + 1) / 2f,
+                gridElementSize * (-gridModel.Grid.GridReference.GetLength(1) + 1) / 2f);
             if (match3ElementControllers == null || match3ElementControllers.Length == 0)
                 match3ElementControllers = new Match3ElementController[gridModel.Grid.GridReference.GetLength(0),
                     gridModel.Grid.GridReference.GetLength(1)];
@@ -35,6 +37,7 @@ namespace Game.Scripts
             {
                 match3ElementController.ElementDestroyed -= OnElementDestroyed;
             }
+
             boardOrigin.DestroyChildren();
             match3ElementControllers = new Match3ElementController[gridModel.Grid.GridReference.GetLength(0),
                 gridModel.Grid.GridReference.GetLength(1)];
@@ -44,14 +47,14 @@ namespace Game.Scripts
 
         void DrawMissingElements()
         {
-            Debug.Log("DRAw MISSING ELEMENTS");
+            // Debug.Log("DRAw MISSING ELEMENTS");
             for (var i = 0; i < gridModel.Grid.GridReference.GetLength(0); i++)
             {
                 for (var j = 0; j < gridModel.Grid.GridReference.GetLength(1); j++)
                 {
                     if (gridModel.Grid.GetGridObject(i, j) != null && match3ElementControllers[i, j] == null)
                     {
-                        Debug.Log($"Creating element for {i}/{j}");
+                        // Debug.Log($"Creating element for {i}/{j}");
                         var instance = Instantiate(prefab, boardOrigin);
                         instance.name = $"Match3Element [{i},{j}]";
                         var match3Controller = instance.GetComponent<Match3ElementController>();

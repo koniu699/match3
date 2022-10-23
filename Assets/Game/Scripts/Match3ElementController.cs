@@ -3,7 +3,6 @@ using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Game.Scripts.ScriptableEvents;
 using Game.Scripts.ScriptableEvents.Events;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -79,7 +78,7 @@ namespace Game.Scripts
 
         void OnElementDestroyed()
         {
-            Debug.Log($"Element Destroyed {x}/{y}");
+            // Debug.Log($"Element Destroyed {x}/{y}");
             ElementDestroyed?.Invoke(x, y);
             Destroy(gameObject);
         }
@@ -118,7 +117,8 @@ namespace Game.Scripts
         public async Task TweenHide()
         {
             IsBusy = true;
-            await spriteRenderer.DOFade(0f, tweenSettings.TweenDuration).OnComplete(() => { IsBusy = false; });
+            if (spriteRenderer != null)
+                await spriteRenderer.DOFade(0f, tweenSettings.TweenDuration).OnComplete(() => { IsBusy = false; });
         }
 
         public void Drop(int destinationY)
@@ -126,10 +126,7 @@ namespace Game.Scripts
             IsBusy = true;
             transform.DOLocalMoveY(destinationY * gridElementSize, tweenSettings.TweenDuration)
                 .SetEase(tweenSettings.EaseType).OnComplete(
-                    () =>
-                    {
-                        IsBusy = false;
-                    });
+                    () => { IsBusy = false; });
         }
 
         public async Task ShowSpawn()
@@ -137,7 +134,8 @@ namespace Game.Scripts
             isBusy = true;
             var currTransform = transform;
             var currentPos = currTransform.localPosition;
-            currTransform.localPosition = new Vector3(currentPos.x, currentPos.y + gridModel.Grid.GridReference.GetLength(1));
+            currTransform.localPosition =
+                new Vector3(currentPos.x, currentPos.y + gridModel.Grid.GridReference.GetLength(1));
             await currTransform.DOLocalMoveY(currentPos.y, tweenSettings.TweenDuration).SetEase(tweenSettings.EaseType)
                 .OnComplete(
                     () => { IsBusy = false; });
@@ -146,7 +144,8 @@ namespace Game.Scripts
         public void Show()
         {
             transform.localPosition = new Vector3(x * gridElementSize, y * gridElementSize);
-            spriteRenderer.DOFade(1f, 0);
+            var currentColor = spriteRenderer.color;
+            spriteRenderer.color = new Color(currentColor.r, currentColor.g, currentColor.b, 1f);
         }
     }
 }

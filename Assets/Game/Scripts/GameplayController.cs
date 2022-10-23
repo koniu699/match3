@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Cysharp.Threading.Tasks;
 using Game.Scripts.ScriptableEvents.Events;
 using Sirenix.Utilities;
 using UnityEngine;
@@ -19,7 +18,7 @@ namespace Game.Scripts
         GridElement selectedGridElement;
 
         bool inputBlocked;
-        
+
         void Awake()
         {
             gridElementClicked.AddListener(OnGridElementClicked);
@@ -34,6 +33,9 @@ namespace Game.Scripts
             }
 
             gridObject.CreateBoard(gridDimensions.x, gridDimensions.y);
+
+            CheckAndClearMatches(false);
+
             match3Presenter.ShowElements();
         }
 
@@ -60,7 +62,7 @@ namespace Game.Scripts
                 var clickedElemMatches = TryFindMatches(clickedElement);
 
                 selectedElemMatches.AddRange(clickedElemMatches);
-                await ClearGridElements(selectedElemMatches);
+                await AnimateClearGridElements(selectedElemMatches);
 
                 DropElements();
                 var spawnedElements = FillRandomElements();
@@ -69,32 +71,40 @@ namespace Game.Scripts
                 match3Presenter.HardRedraw();
                 selectedGridElement = null;
 
-                while (true)
-                {
-                    var matches = new HashSet<GridElement>();
-                    for (int i = 0; i < gridObject.Grid.GridReference.GetLength(0); i++)
-                    {
-                        for (int j = 0; j < gridObject.Grid.GridReference.GetLength(1); j++)
-                        {
-                            matches.AddRange(TryFindMatches(gridObject.Grid.GetGridObject(i, j)));
-                        }
-                    }
-
-                    if (matches.Count <= 0)
-                    {
-                        inputBlocked = false;
-                        break;
-                    }
-
-                    await ClearGridElements(matches);
-                    DropElements();
-                    FillRandomElements();
-                    gridObject.Grid.GridUpdated?.Invoke();
-                    match3Presenter.HardRedraw();
-                }
+                await CheckAndClearMatches();
             }
             else
                 selectedGridElement = clickedElement;
+        }
+
+        async Task CheckAndClearMatches(bool useAnimations = true)
+        {
+            while (true)
+            {
+                var matches = new HashSet<GridElement>();
+                for (var i = 0; i < gridObject.Grid.GridReference.GetLength(0); i++)
+                {
+                    for (var j = 0; j < gridObject.Grid.GridReference.GetLength(1); j++)
+                    {
+                        matches.AddRange(TryFindMatches(gridObject.Grid.GetGridObject(i, j)));
+                    }
+                }
+
+                if (matches.Count <= 0)
+                {
+                    inputBlocked = false;
+                    break;
+                }
+
+                if (useAnimations)
+                    await AnimateClearGridElements(matches);
+                else
+                    ClearGridElements(matches);
+                DropElements();
+                FillRandomElements();
+                gridObject.Grid.GridUpdated?.Invoke();
+                match3Presenter.HardRedraw();
+            }
         }
 
         List<Vector2Int> FillRandomElements()
@@ -108,7 +118,7 @@ namespace Game.Scripts
                 {
                     if (gridObject.Grid.GetGridObject(i, j) != null)
                         continue;
-                    Debug.Log($"FILL RANDOM ELEM FOR {i}/{j}");
+                    // Debug.Log($"FILL RANDOM ELEM FOR {i}/{j}");
                     gridObject.Grid.SetGridObject(i, j, gridObject.CreateNewElement(gridObject.Grid, i, j));
                     elementsToSpawn.Add(new Vector2Int(i, j));
                 }
@@ -172,14 +182,18 @@ namespace Game.Scripts
                 totalMatches.AddRange(horizontalMatches);
             if (verticalMatches.Count >= 3)
                 totalMatches.AddRange(verticalMatches);
-            Debug.Log($"Matches found {horizontalMatches.Count} - {verticalMatches.Count}");
+            // Debug.Log($"Matches found {horizontalMatches.Count} - {verticalMatches.Count}");
             return totalMatches;
         }
 
-        async Task ClearGridElements(HashSet<GridElement> elements)
+        async Task AnimateClearGridElements(HashSet<GridElement> elements)
         {
             await match3Presenter.ShowElementsClear(elements.ToList());
+            ClearGridElements(elements);
+        }
 
+        void ClearGridElements(HashSet<GridElement> elements)
+        {
             foreach (var element in elements)
             {
                 DestroyGridElement(element);
