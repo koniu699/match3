@@ -35,7 +35,7 @@ namespace Game.Scripts
             gridObject.CreateBoard(gridDimensions.x, gridDimensions.y);
 
 #pragma warning disable CS4014
-            CheckAndClearMatches(false);
+            CheckAndClearMatches(false, false);
 #pragma warning restore CS4014
 
             match3Presenter.ShowElements();
@@ -56,9 +56,9 @@ namespace Game.Scripts
                 return;
             }
 
-            inputBlocked = true;
             if (selectedGridElement.IsNeighbour(clickedElement))
             {
+                inputBlocked = true;
                 await SwapGridElements(selectedGridElement, clickedElement);
                 var selectedElemMatches = TryFindMatches(selectedGridElement);
                 var clickedElemMatches = TryFindMatches(clickedElement);
@@ -79,7 +79,7 @@ namespace Game.Scripts
                 selectedGridElement = clickedElement;
         }
 
-        async Task CheckAndClearMatches(bool useAnimations = true)
+        async Task CheckAndClearMatches(bool useAnimations = true, bool useSpecials = true)
         {
             while (true)
             {
@@ -96,6 +96,10 @@ namespace Game.Scripts
                 {
                     inputBlocked = false;
                     break;
+                }
+
+                if (useSpecials)
+                {
                 }
 
                 if (useAnimations)
@@ -169,7 +173,7 @@ namespace Game.Scripts
             }
         }
 
-        HashSet<GridElement> TryFindMatches(GridElement gridElement)
+        HashSet<GridElement> TryFindMatches(GridElement gridElement, bool useSpecials = true)
         {
             var horizontalMatches = FindMatchesFor(1, 0, gridElement);
             horizontalMatches.AddRange(FindMatchesFor(-1, 0, gridElement));
@@ -183,7 +187,45 @@ namespace Game.Scripts
                 totalMatches.AddRange(horizontalMatches);
             if (verticalMatches.Count >= 3)
                 totalMatches.AddRange(verticalMatches);
+
+            if (!useSpecials)
+                return totalMatches;
+            var additionalMatches = HandleSpecials(totalMatches);
+            totalMatches.AddRange(additionalMatches);
+
             return totalMatches;
+        }
+
+        HashSet<GridElement> HandleSpecials(HashSet<GridElement> currentMatches)
+        {
+            GridElement nonSpecial = null;
+            var specialElements = new List<GridElement>();
+            foreach (var match in currentMatches)
+            {
+                if (match.Match3Element is SpecialMatch3Element)
+                {
+                    specialElements.Add(match);
+                    continue;
+                }
+
+                nonSpecial = match;
+                break;
+            }
+
+            if (nonSpecial == null)
+                return currentMatches;
+
+            var additionalMatches = new HashSet<GridElement>();
+            foreach (var specialElement in specialElements)
+            {
+                var specialMatch3Element = specialElement.Match3Element as SpecialMatch3Element;
+                if (specialMatch3Element == null)
+                    continue;
+                additionalMatches.AddRange(specialMatch3Element.HandleSpecialAbility(gridObject,
+                    nonSpecial.Match3Element, specialElement));
+            }
+
+            return additionalMatches;
         }
 
         async Task AnimateClearGridElements(HashSet<GridElement> elements)

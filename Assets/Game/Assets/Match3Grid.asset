@@ -17,9 +17,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 4d36865142c99b64eb852889fa79046d, type: 2}
   - {fileID: 11400000, guid: 9f591d417322e8d44ab0af4e709f0b83, type: 2}
   - {fileID: 11400000, guid: 5ab4927a82859244389b9f6fcf0b319c, type: 2}
-  - {fileID: 11400000, guid: e34f3cc1c23d0c94fad7a7ed84cfba6c, type: 2}
-  - {fileID: 11400000, guid: d16f8c3c0be7c8e4592d20ee15c83223, type: 2}
+  - {fileID: 11400000, guid: 844adf491e969574fb1444474fed8f88, type: 2}
+  - {fileID: 11400000, guid: 8209ea690bb8cb945ad105ac0b7826c0, type: 2}
   gridValueUpdatedEvent: {fileID: 11400000, guid: 48626b5734c7c384e8ce888cd76d089a, type: 2}
   specialElements:
-  - {fileID: 11400000, guid: e34f3cc1c23d0c94fad7a7ed84cfba6c, type: 2}
-  - {fileID: 11400000, guid: d16f8c3c0be7c8e4592d20ee15c83223, type: 2}
+  - {fileID: 11400000, guid: 844adf491e969574fb1444474fed8f88, type: 2}
+  - {fileID: 11400000, guid: 8209ea690bb8cb945ad105ac0b7826c0, type: 2}
