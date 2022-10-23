@@ -23,6 +23,18 @@ namespace Game.Scripts
             gridElementClicked.AddListener(OnGridElementClicked);
         }
 
+        void Start()
+        {
+            if (gridObject == null)
+            {
+                Debug.LogError("Grid Object not assigned! Please fix.");
+                return;
+            }
+
+            gridObject.CreateBoard(gridDimensions.x, gridDimensions.y);
+            match3Presenter.ShowElements();
+        }
+
         void OnGridElementClicked(GridElement clickedElement)
         {
             HandleElementClicked(clickedElement);
@@ -42,14 +54,14 @@ namespace Game.Scripts
                 var selectedElemMatches = TryFindMatches(selectedGridElement);
                 var clickedElemMatches = TryFindMatches(clickedElement);
 
+                selectedElemMatches.AddRange(clickedElemMatches);
                 await ClearGridElements(selectedElemMatches);
-                await ClearGridElements(clickedElemMatches);
 
                 DropElements();
                 var spawnedElements =  FillRandomElements();
                 gridObject.Grid.GridUpdated?.Invoke();
-                
-                await match3Presenter.ShowSpawnElements(spawnedElements);
+                // await match3Presenter.ShowSpawnElements(spawnedElements);
+                match3Presenter.HardRedraw();
                 selectedGridElement = null;
             }
             else
@@ -67,6 +79,7 @@ namespace Game.Scripts
                 {
                     if (gridObject.Grid.GetGridObject(i, j) != null) 
                         continue;
+                    Debug.Log($"FILL RANDOM ELEM FOR {i}/{j}");
                     gridObject.Grid.SetGridObject(i, j, gridObject.CreateNewElement(gridObject.Grid, i, j));
                     elementsToSpawn.Add(new Vector2Int(i, j));
                 }
@@ -106,8 +119,7 @@ namespace Game.Scripts
                     break;
                 if (gridObject.Grid.GetGridObject(i, j + k) != null)
                 {
-                    Debug.Log($"DROPPING ELEMENT {i}/{j + k} to POSITION {i}/{j}");
-                    match3Presenter.DropElement(i, j + k, j);
+                    // match3Presenter.DropElement(i, j + k, j);
                     gridObject.Grid.SetGridObject(i, j,
                         new GridElement(gridObject.Grid, i, j,
                             gridObject.Grid.GetGridObject(i, j + k).Match3Element));
@@ -147,7 +159,7 @@ namespace Game.Scripts
 
         void DestroyGridElement(GridElement element)
         {
-            gridObject.Grid.GetGridObject(element.X, element.Y)?.ElementDestroyed();
+            gridObject.Grid.GetGridObject(element.X, element.Y)?.Destroy();
             gridObject.Grid.SetGridObject(element.X, element.Y, null);
         }
 
@@ -175,17 +187,6 @@ namespace Game.Scripts
             }
 
             return matches;
-        }
-
-        public void Start()
-        {
-            if (gridObject == null)
-            {
-                Debug.LogError("Grid Object not assigned! Please fix.");
-                return;
-            }
-
-            gridObject.CreateBoard(gridDimensions.x, gridDimensions.y);
         }
 
         void OnDestroy()

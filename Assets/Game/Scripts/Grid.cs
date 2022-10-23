@@ -8,7 +8,6 @@ namespace Game.Scripts
     {
         public UnityAction GridUpdated;
         public UnityAction<int, int, T> GridObjectValueUpdated;
-        public UnityAction<int, int, T> GridObjectUpdated;
 
         public T[,] GridReference { get; }
 
@@ -35,7 +34,6 @@ namespace Game.Scripts
             }
 
             GridReference[x, y] = value;
-            GridObjectUpdated?.Invoke(x, y, value);
         }
 
         public void TriggerGridObjectValueUpdated(int x, int y)

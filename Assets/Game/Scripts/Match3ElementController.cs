@@ -3,7 +3,9 @@ using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Game.Scripts.ScriptableEvents;
 using Game.Scripts.ScriptableEvents.Events;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Game.Scripts
 {
@@ -21,7 +23,7 @@ namespace Game.Scripts
         bool isBusy = false;
 
         float gridElementSize;
-        
+
         bool IsBusy
         {
             get => isBusy;
@@ -31,6 +33,8 @@ namespace Game.Scripts
                 ResetView();
             }
         }
+
+        public UnityAction<int, int> ElementDestroyed;
 
         Vector2 dragBeginPos;
         GridElement assignedElement;
@@ -76,8 +80,8 @@ namespace Game.Scripts
         void OnElementDestroyed()
         {
             Debug.Log($"Element Destroyed {x}/{y}");
-            assignedElement.ElementDestroyed -= OnElementDestroyed;
-            Destroy(this);
+            ElementDestroyed?.Invoke(x, y);
+            Destroy(gameObject);
         }
 
         void ResetView()
@@ -94,6 +98,7 @@ namespace Game.Scripts
 
         void OnDestroy()
         {
+            assignedElement.ElementDestroyed -= OnElementDestroyed;
             gridElementClickedEvent.RemoveListener(OnGridElementClicked);
             gridValueUpdatedEvent.RemoveListener(OnGridValueUpdated);
         }
@@ -119,19 +124,29 @@ namespace Game.Scripts
         public void Drop(int destinationY)
         {
             IsBusy = true;
-            transform.DOLocalMoveY(destinationY * gridElementSize, tweenSettings.TweenDuration).SetEase(tweenSettings.EaseType).OnComplete(
-                () => { IsBusy = false; });
+            transform.DOLocalMoveY(destinationY * gridElementSize, tweenSettings.TweenDuration)
+                .SetEase(tweenSettings.EaseType).OnComplete(
+                    () =>
+                    {
+                        IsBusy = false;
+                    });
         }
 
         public async Task ShowSpawn()
         {
             isBusy = true;
             var currTransform = transform;
-            var currentPos = currTransform.position;
-            currTransform.position = new Vector3(currentPos.x, currentPos.y * 2);
+            var currentPos = currTransform.localPosition;
+            currTransform.localPosition = new Vector3(currentPos.x, currentPos.y + gridModel.Grid.GridReference.GetLength(1));
             await currTransform.DOLocalMoveY(currentPos.y, tweenSettings.TweenDuration).SetEase(tweenSettings.EaseType)
                 .OnComplete(
                     () => { IsBusy = false; });
+        }
+
+        public void Show()
+        {
+            transform.localPosition = new Vector3(x * gridElementSize, y * gridElementSize);
+            spriteRenderer.DOFade(1f, 0);
         }
     }
 }

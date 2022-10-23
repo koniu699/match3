@@ -35,7 +35,7 @@ namespace Game.Scripts
             grid.TriggerGridObjectValueUpdated(X, Y);
         }
 
-        public void OnDestroy()
+        public void Destroy()
         {
             ElementDestroyed?.Invoke();
         }

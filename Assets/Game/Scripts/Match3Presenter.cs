@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Game.Scripts
@@ -27,8 +28,23 @@ namespace Game.Scripts
             DrawMissingElements();
         }
 
+        [Button]
+        public void HardRedraw()
+        {
+            foreach (var match3ElementController in match3ElementControllers)
+            {
+                match3ElementController.ElementDestroyed -= OnElementDestroyed;
+            }
+            boardOrigin.DestroyChildren();
+            match3ElementControllers = new Match3ElementController[gridModel.Grid.GridReference.GetLength(0),
+                gridModel.Grid.GridReference.GetLength(1)];
+            DrawMissingElements();
+            ShowElements();
+        }
+
         void DrawMissingElements()
         {
+            Debug.Log("DRAw MISSING ELEMENTS");
             for (var i = 0; i < gridModel.Grid.GridReference.GetLength(0); i++)
             {
                 for (var j = 0; j < gridModel.Grid.GridReference.GetLength(1); j++)
@@ -36,17 +52,23 @@ namespace Game.Scripts
                     if (gridModel.Grid.GetGridObject(i, j) != null && match3ElementControllers[i, j] == null)
                     {
                         Debug.Log($"Creating element for {i}/{j}");
-                        var position = new Vector2(i * gridElementSize, j * gridElementSize);
                         var instance = Instantiate(prefab, boardOrigin);
-                        instance.transform.localPosition = position;
+                        instance.name = $"Match3Element [{i},{j}]";
                         var match3Controller = instance.GetComponent<Match3ElementController>();
                         if (match3Controller == null)
                             continue;
                         match3Controller.Setup(i, j, gridModel, gridElementSize);
+                        match3Controller.ElementDestroyed += OnElementDestroyed;
                         match3ElementControllers[i, j] = match3Controller;
                     }
                 }
             }
+        }
+
+        void OnElementDestroyed(int x, int y)
+        {
+            match3ElementControllers[x, y].ElementDestroyed -= OnElementDestroyed;
+            match3ElementControllers[x, y] = null;
         }
 
         public async Task SwapElements(GridElement firstElement, GridElement secondElement)
@@ -81,7 +103,6 @@ namespace Game.Scripts
 
         public async Task ShowSpawnElements(List<Vector2Int> elementsToSpawn)
         {
-            Debug.Log("SHOW SPAWN ELEMENTS");
             var tasks = new Task[elementsToSpawn.Count];
             for (var i = 0; i < elementsToSpawn.Count; i++)
             {
@@ -89,6 +110,14 @@ namespace Game.Scripts
             }
 
             await Task.WhenAll(tasks);
+        }
+
+        public void ShowElements()
+        {
+            foreach (var match3ElementController in match3ElementControllers)
+            {
+                match3ElementController.Show();
+            }
         }
     }
 }
