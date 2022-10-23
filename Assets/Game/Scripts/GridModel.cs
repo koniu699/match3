@@ -12,6 +12,8 @@ namespace Game.Scripts
         [SerializeField] List<Match3Element> match3Elements;
         [SerializeField] GridValueUpdatedEvent gridValueUpdatedEvent;
 
+        [SerializeField] List<Match3Element> specialElements;
+        public List<Match3Element> SpecialElements => specialElements;
         public UnityAction GridUpdated;
 
         public Grid<GridElement> Grid { get; private set; }

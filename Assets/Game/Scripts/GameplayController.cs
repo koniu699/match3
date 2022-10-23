@@ -34,7 +34,9 @@ namespace Game.Scripts
 
             gridObject.CreateBoard(gridDimensions.x, gridDimensions.y);
 
+#pragma warning disable CS4014
             CheckAndClearMatches(false);
+#pragma warning restore CS4014
 
             match3Presenter.ShowElements();
         }
@@ -118,7 +120,6 @@ namespace Game.Scripts
                 {
                     if (gridObject.Grid.GetGridObject(i, j) != null)
                         continue;
-                    // Debug.Log($"FILL RANDOM ELEM FOR {i}/{j}");
                     gridObject.Grid.SetGridObject(i, j, gridObject.CreateNewElement(gridObject.Grid, i, j));
                     elementsToSpawn.Add(new Vector2Int(i, j));
                 }
@@ -182,7 +183,6 @@ namespace Game.Scripts
                 totalMatches.AddRange(horizontalMatches);
             if (verticalMatches.Count >= 3)
                 totalMatches.AddRange(verticalMatches);
-            // Debug.Log($"Matches found {horizontalMatches.Count} - {verticalMatches.Count}");
             return totalMatches;
         }
 
@@ -217,7 +217,8 @@ namespace Game.Scripts
                 {
                     var elementToCheck =
                         gridObject.Grid.GetGridObject(gridElement.X + valueModX * i, gridElement.Y + valueModY * i);
-                    if (elementToCheck.Match3Element == gridElement.Match3Element)
+                    var isSpecialMatch = gridObject.SpecialElements.Contains(elementToCheck.Match3Element);
+                    if (elementToCheck.Match3Element == gridElement.Match3Element || isSpecialMatch)
                     {
                         matches.Add(elementToCheck);
                         i++;
