@@ -1,11 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Game.Scripts
 {
-    public class Match3Presenter : MonoBehaviour
+    public class Match3Presenter : Match3PresenterBase
     {
         [SerializeField] GridModel gridModel;
         [SerializeField] Transform boardOrigin;
@@ -21,7 +20,6 @@ namespace Game.Scripts
 
         void OnGridUpdated()
         {
-            // Debug.Log("Draw grid triggered");
             transform.position = new Vector3(gridElementSize * (-gridModel.Grid.GridReference.GetLength(0) + 1) / 2f,
                 gridElementSize * (-gridModel.Grid.GridReference.GetLength(1) + 1) / 2f);
             if (match3ElementControllers == null || match3ElementControllers.Length == 0)
@@ -30,8 +28,7 @@ namespace Game.Scripts
             DrawMissingElements();
         }
 
-        [Button]
-        public void HardRedraw()
+        public override void RedrawBoard()
         {
             foreach (var match3ElementController in match3ElementControllers)
             {
@@ -47,14 +44,12 @@ namespace Game.Scripts
 
         void DrawMissingElements()
         {
-            // Debug.Log("DRAw MISSING ELEMENTS");
             for (var i = 0; i < gridModel.Grid.GridReference.GetLength(0); i++)
             {
                 for (var j = 0; j < gridModel.Grid.GridReference.GetLength(1); j++)
                 {
                     if (gridModel.Grid.GetGridObject(i, j) != null && match3ElementControllers[i, j] == null)
                     {
-                        // Debug.Log($"Creating element for {i}/{j}");
                         var instance = Instantiate(prefab, boardOrigin);
                         instance.name = $"Match3Element [{i},{j}]";
                         var match3Controller = instance.GetComponent<Match3ElementController>();
@@ -74,7 +69,7 @@ namespace Game.Scripts
             match3ElementControllers[x, y] = null;
         }
 
-        public async Task SwapElements(GridElement firstElement, GridElement secondElement)
+        public override async Task SwapElements(GridElement firstElement, GridElement secondElement)
         {
             var firstController = match3ElementControllers[firstElement.X, firstElement.Y];
             var secondController = match3ElementControllers[secondElement.X, secondElement.Y];
@@ -99,12 +94,12 @@ namespace Game.Scripts
             await Task.WhenAll(tasks);
         }
 
-        public void DropElement(int originX, int originY, int destinationY)
+        public override void DropElement(int originX, int originY, int destinationY)
         {
             match3ElementControllers[originX, originY].Drop(destinationY);
         }
 
-        public async Task ShowSpawnElements(List<Vector2Int> elementsToSpawn)
+        public override async Task ShowSpawnElements(List<Vector2Int> elementsToSpawn)
         {
             var tasks = new Task[elementsToSpawn.Count];
             for (var i = 0; i < elementsToSpawn.Count; i++)
@@ -115,7 +110,7 @@ namespace Game.Scripts
             await Task.WhenAll(tasks);
         }
 
-        public void ShowElements()
+        public override void ShowElements()
         {
             foreach (var match3ElementController in match3ElementControllers)
             {

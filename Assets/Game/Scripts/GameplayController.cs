@@ -69,7 +69,7 @@ namespace Game.Scripts
                 DropElements();
                 FillRandomElements();
                 gridObject.Grid.GridUpdated?.Invoke();
-                match3Presenter.HardRedraw();
+                match3Presenter.RedrawBoard();
                 selectedGridElement = null;
 
                 await CheckAndClearMatches();
@@ -104,7 +104,7 @@ namespace Game.Scripts
                 DropElements();
                 FillRandomElements();
                 gridObject.Grid.GridUpdated?.Invoke();
-                match3Presenter.HardRedraw();
+                match3Presenter.RedrawBoard();
             }
         }
 
